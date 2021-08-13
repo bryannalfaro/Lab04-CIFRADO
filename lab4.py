@@ -9,6 +9,7 @@ import cifrados
 import matplotlib.pyplot as plt
 from PIL import Image
 import random
+import testLab
 
 def show_image(I):
     plt.figure()
@@ -16,7 +17,7 @@ def show_image(I):
     plt.show()
 
 # load image as pixel array
-img = Image.open('camera.png').convert('L') # L = 8-bit pixels, black and white
+'''img = Image.open('camera.png').convert('L') # L = 8-bit pixels, black and white
 #img.show()
 
 imgBits = cifrados.read_image(img)
@@ -45,9 +46,17 @@ s3 = random.randint(0,30000)
 resultWichman = cifrados.wichman(s1,s2,s3,len(imgBits))
 
 wichman_xor = cifrados.xor(imgBits, resultWichman)
-show_image(cifrados.write_image(wichman_xor, img))
+show_image(cifrados.write_image(wichman_xor, img))'''
 
+
+img = Image.open('camera.png').convert('L') # L = 8-bit pixels, black and white
+#img.show()
+
+imgBits = cifrados.read_image(img)
 resultLFSR = cifrados.lfsr(seed=format('110100011011011010111101'), taps=[2,5,7,10,15,11], nbits=len(imgBits))
 lfsr_xor = cifrados.xor(imgBits, resultLFSR)
 print('now LFSR')
-show_image(cifrados.write_image(lfsr_xor, img))
+#show_image(cifrados.write_image(lfsr_xor, img))
+
+
+testLab.successTable(lfsr_xor)

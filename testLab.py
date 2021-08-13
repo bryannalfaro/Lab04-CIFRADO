@@ -6,15 +6,17 @@ import random
 
 
 #TEST TAKE FROM : https://github.com/GINARTeam/NIST-statistical-test
-def test1(input, n):
-    ones = input.count('1') #number of ones
-    zeroes = input.count('0')    #number of zeros
+def test1(text, th=0.01):
+    n = len(text)
+    ones = text.count('1') #number of ones
+    zeroes = text.count('0')    #number of zeros
     s = abs(ones - zeroes)
     p = math.erfc(float(s)/(math.sqrt(float(n)) * math.sqrt(2.0))) #p-value
-    success = ( p >= 0.01)  # success = true if p-value >= 0.01
-    return [zeroes, ones, s, p, success]
+    success = ( p >= th)  # success = true if p-value >= 0.01
+    return [p, success]
 
-def test2(input, n, M=32):
+def test2(text, th = 0.01, M=32):
+    n = len(text)
     # Compute number of blocks M = block size. N=num of blocks
     # N = floor(n/M)
     # miniumum block size 20 bits, most blocks 100
@@ -26,14 +28,14 @@ def test2(input, n, M=32):
         M = int(math.floor(n/N))
 
     if n < 100:
-        # Too little data for test. Input of length at least 100 bits required
+        # Too little data for test. text of length at least 100 bits required
         return [0.0, 0.0, False]
     num_of_blocks = N
     block_size = M
     proportions = list()
 
     for i in range(num_of_blocks):
-        block = input[i*(block_size):((i+1)*(block_size))]
+        block = text[i*(block_size):((i+1)*(block_size))]
         ones = block.count('1')
         zeroes = block.count('0')
         proportions.append(Fraction(ones,block_size))
@@ -42,12 +44,13 @@ def test2(input, n, M=32):
     for prop in proportions:
         chisq += 4.0*block_size*((prop - Fraction(1,2))**2)
     p = ss.gammaincc((num_of_blocks/2.0),float(chisq)/2.0) # p-value
-    success = (p>= 0.01)
-    return [chisq, p, success]
+    success = (p>= th)
+    return [p, success]
 
-def test3(input, n):
-    ones = input.count('1') #number of ones
-    zeroes = input.count('0')    #number of zeros
+def test3(text, th = 0.01):
+    n = len(text)
+    ones = text.count('1') #number of ones
+    zeroes = text.count('0')    #number of zeros
     prop = float(ones)/float(n)
     tau = 2.0/math.sqrt(n)
     vobs = 0.0
@@ -57,14 +60,15 @@ def test3(input, n):
     else:
         vobs = 1.0
         for i in range(n-1):
-            if input[i] != input[i+1]:
+            if text[i] != text[i+1]:
                 vobs += 1.0
 
         p = math.erfc(abs(vobs - (2.0*n*prop*(1.0-prop)))/(2.0*math.sqrt(2.0*n)*prop*(1-prop) ))
-    success = (p>=0.01)
-    return [zeroes, ones, prop, vobs, p, success]
+    success = (p>=th)
+    return [p, success]
 
-def test4(input, n):
+def test4(text, th = 0.01):
+    n = len(text)
     M8 = [0.2148, 0.3672, 0.2305, 0.1875]
     # Length of blocks
     M = 8
@@ -75,7 +79,7 @@ def test4(input, n):
 
     for i in range(N): # over each block
         #find the longest run
-        block = input[i*M:((i+1)*M)] # Block i
+        block = text[i*M:((i+1)*M)] # Block i
         run = 0
         longest = 0
         for j in range(M): # Count the bits.
@@ -99,18 +103,20 @@ def test4(input, n):
         chi_sq += upper/lower
     # p-value
     p = ss.gammaincc(K/2.0, chi_sq/2.0)
-    success = (p>=0.01)
-    return [chi_sq, p, success]
+    success = (p>=th)
+    return [p, success]
 
 #5 no jalo
 
-def test6(input, n):
+#este es el 6
+def test5(text, th = 0.01):
+    n = len(text)
     T = math.sqrt(math.log(1.0/0.05)*n) # Compute upper threshold
     N0 = 0.95*n/2.0
     write_array = [0.0,0.0,0.0,0.0]
     ts = list()             # Convert to +1,-1
     for i in range(n):
-        if input[i] == '1':
+        if text[i] == '1':
             ts.append(1)
         else:
             ts.append(-1)
@@ -118,7 +124,7 @@ def test6(input, n):
 
     fs = np.fft.fft(ts_np)  # Compute DFT
 
-    mags = abs(fs)[:n/2]  #Compute magnitudes of first half of sequence
+    mags = abs(fs)[:int(n/2)]  #Compute magnitudes of first half of sequence
 
     N1 = 0.0   # Count the peaks above the upper theshold
     for mag in mags:
@@ -127,11 +133,12 @@ def test6(input, n):
     d = (N1 - N0)/math.sqrt((n*0.95*0.05)/4)
     # Compute the P value
     p = math.erfc(abs(d)/math.sqrt(2))
-    success = (p>=0.01)
-    return [N0, N1, d, p, success]
+    success = (p>=th)
+    return [p, success]
 
-def test7(input, n):
-
+#este es el 7
+def test6(text, th = 0.01):
+    n = len(text)
     # The templates provdided in SP800-22rev1a
     templates = [None for x in range(7)]
     templates[0] = [[0,1],[1,0]]
@@ -183,13 +190,13 @@ def test7(input, n):
     m = len(B)
 
     N = 8  #number of block
-    M = n/N    #length of each block
+    M = int(n/N)    #length of each block
 
     blocks = list() # Split into N blocks of M bits
     for i in range(N):
         block = list()
         for j in range(M):
-            block.append(int(input[i*M+j],2))
+            block.append(int(text[i*M+j],2))
         blocks.append(block)
 
     W=list() # Count the number of matches of the template in each block Wj
@@ -212,11 +219,12 @@ def test7(input, n):
     for j in range(N):
         chi_sq += ((W[j] - mu)**2)/sigma
     p = ss.gammaincc(N/2.0, chi_sq/2.0) # Compute P value
-    success = ( p >= 0.01)
-    return [mu, sigma, chi_sq, p, success]
+    success = ( p >= th)
+    return [p, success]
 
-def test9(input, n, patternlen=None, initblocks=None):
-
+#este es el 9
+def test7(text, th = 0.01, patternlen=None, initblocks=None):
+    n = len(text)
     # Step 1. Choose the block size
     if patternlen != None:
         L = patternlen
@@ -226,7 +234,7 @@ def test9(input, n, patternlen=None, initblocks=None):
               231669760,496435200,1059061760]
         L = 6
         if n < 387840:
-            # Too little data. Inputs of length at least 387840 are recommended
+            # Too little data. texts of length at least 387840 are recommended
             return [0] * 8
         for threshold in ns:
             if n >= threshold:
@@ -244,14 +252,14 @@ def test9(input, n, patternlen=None, initblocks=None):
     nsymbols = (2**L)
     T=[0 for x in range(nsymbols)] # zero out the table
     for i in range(Q):             # Mark final position of
-        pattern = input[i*L:(i+1)*L] # each pattern
+        pattern = text[i*L:(i+1)*L] # each pattern
         idx = int(pattern, 2)
         T[idx]=i+1      # +1 to number indexes 1..(2**L)+1
                         # instead of 0..2**L
     # Step 4 Iterate
     sum = 0.0
     for i in range(Q,nblocks):
-        pattern = input[i*L:(i+1)*L]
+        pattern = text[i*L:(i+1)*L]
         j = int(pattern,2)
         dist = i+1-T[j]
         T[j] = i+1
@@ -275,11 +283,12 @@ def test9(input, n, patternlen=None, initblocks=None):
     sigma = abs((fn - ev_table[L])/((math.sqrt(var_table[L]))*math.sqrt(2)))
     P = math.erfc(sigma)
 
-    success = (P >= 0.01)
-    return [n, nblocks, L, K, Q, sigma, P, success]
+    success = (P >= th)
+    return [P, success]
 
-def test12(input, n):
-
+#este es el 12
+def test8(text, th = 0.01):
+    n = len(text)
     m = int(math.floor(math.log(n,2)))-6
     if m < 2:
         m = 2
@@ -290,14 +299,14 @@ def test12(input, n):
     phi_m = list()
     for iterm in range(m,m+2):
         # Step 1
-        padded_input=input+input[0:iterm-1]
+        padded_text=text+text[0:iterm-1]
 
         # Step 2
         counts = list()
         for i in range(2**iterm):
             count = 0
             for j in range(n):
-                if int(padded_input[j:j+iterm],2) == i:
+                if int(padded_text[j:j+iterm],2) == i:
                     count += 1
             counts.append(count)
 
@@ -325,16 +334,17 @@ def test12(input, n):
     # Step 7
     p = ss.gammaincc(2**(m-1),(chisq/2.0))
 
-    success = (p >= 0.01)
+    success = (p >= th)
 
-    return [appen_m, chisq, p, success]
+    return [p, success]
 
-def test14(input, n):
-
+#test 14
+def test9(text, th = 0.01):
+    n = len(text)
     # Convert to +1,-1
     x = list()
     for i in range(n):
-        x.append(int(input[i],2)*2 -1 )
+        x.append(int(text[i],2)*2 -1 )
 
     # Build the partial sums
     pos = 0
@@ -413,16 +423,17 @@ def test14(input, n):
         p_total += p
         plist.append(p)
         chi_sq.append(chisq)
-        if p < 0.01:
+        if p < th:
             success = False
 
-    return [n, J, chi_sq, plist, p_total/8, success]
+    return [p_total/8, success]
 
-def test15(input, n):
-
+#este es el 15
+def test10(text, th = 0.01):
+    n = len(text)
     x = list()             # Convert to +1,-2
     for i in range(n):
-        x.append(int(input[i],2)*2-1)
+        x.append(int(text[i],2)*2-1)
 
     # Build the partial sums
     pos = 0
@@ -459,7 +470,15 @@ def test15(input, n):
 
             p_average +=p
             plist.append(p)
-            if p < 0.01:
+            if p < th:
                 success = False
 
-    return [n, J, count, plist, p_average/19, success]
+    return [p, success]
+
+#TODO REVISAR EN EL METODO QUE FALLA PARA VER SI DE VERDAD FALLA
+def successTable(bits):
+
+    for i in range(10):
+        result = globals()['test{}'.format(i+1)](bits)
+        print('Test ',(i+1),', p = ',result[0],', result = ',result[1])
+
