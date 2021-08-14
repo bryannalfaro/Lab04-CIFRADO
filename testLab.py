@@ -478,7 +478,7 @@ def test10(text, th = 0.01):
 
 #TODO REVISAR EN EL METODO QUE FALLA PARA VER SI DE VERDAD FALLA
 def successTable(bits):
-
+    lista = []
     for i in range(10):
         result = globals()['test{}'.format(i+1)](bits)
         print('Test ',(i+1),', p = ',result[0],', result = ',result[1])
@@ -493,6 +493,10 @@ def generateLGC():
         N = random.randint(0,40000)
         bits = lgc(a,b,N,35,100)
         successTable(bits)
+
+        #contar cuantos test fallo cada cadena
+        #contar cuantas cadenas fallaron en total por test
+
 
 def generateWichman():
     for i in range(200):
