@@ -1,3 +1,4 @@
+from Lab4.cifrados import lfsr, lgc, wichman
 import math
 import scipy.special as ss
 from fractions import Fraction
@@ -482,3 +483,27 @@ def successTable(bits):
         result = globals()['test{}'.format(i+1)](bits)
         print('Test ',(i+1),', p = ',result[0],', result = ',result[1])
 
+
+#to generate histogram
+#TODO Revisar que cosas van random y hacer el histograma
+def generateLGC():
+    for i in range(200):
+        a  = random.randint(0,40000)
+        b = random.randint(0, 40000)
+        N = random.randint(0,40000)
+        bits = lgc(a,b,N,35,100)
+        successTable(bits)
+
+def generateWichman():
+    for i in range(200):
+        s1 = random.randint(0,30000)
+        s2 = random.randint(0,30000)
+        s3 = random.randint(0,30000)
+
+        bits = wichman(s1,s2,s3,100)
+        successTable(bits)
+
+def generateLFSR():
+    for i in range(200):
+        bits = lfsr(seed=format('110100011011011010111101'), taps=[2,5,7,10,15,11], nbits=100)
+        successTable(bits)
