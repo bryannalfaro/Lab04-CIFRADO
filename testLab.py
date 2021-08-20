@@ -563,11 +563,12 @@ def successTable(bits, showTable=False, returnFails=False):
     lista = []
     for i in range(10):
         result = globals()['test{}'.format(i+1)](bits)
-        print('Test ', (i+1), ', p = ', result[0], ', result = ', result[1])
+
         if returnFails:
             if not result[1]:
                 lista.append(result[0])
         else:
+            print('Test ', (i+1), ', p = ', result[0], ', result = ', result[1])
             lista.append(result[0])
     return lista
 
@@ -577,10 +578,10 @@ def getHistogram(lista):
     # plt.ylabel('Probabilidad')
     # plt.xlabel('Test')
     # plt.show()
-    plt.hist(lista, density=True, bins=[0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1])
+    plt.hist(lista, density=False, bins=7)
     plt.title('Probabilidades de los tests')
-    plt.ylabel('Cantidad de tests')
-    plt.xlabel('Probabilidad')
+    plt.ylabel('Cantidad de cadenas')
+    plt.xlabel('Test fallidos')
     plt.show()
 
 def generateLGC(seed=30, size=20000, iterations=1000):
@@ -590,7 +591,7 @@ def generateLGC(seed=30, size=20000, iterations=1000):
         b = random.randint(0, 40000)
         N = random.randint(0, 40000)
         bits = lgc(a, b, N, seed, size)
-        lista += successTable(bits, returnFails=True)
+        lista.append(len(successTable(bits, returnFails=True)))
     getHistogram(lista)
 
 def generateWichman(size=20000, iterations=1000):
@@ -600,7 +601,7 @@ def generateWichman(size=20000, iterations=1000):
         s2 = random.randint(0, 30000)
         s3 = random.randint(0, 30000)
         bits = wichman(s1, s2, s3, size)
-        lista += successTable(bits)
+        lista.append(len(successTable(bits, returnFails=True)))
     getHistogram(lista)
 
 
