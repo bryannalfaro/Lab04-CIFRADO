@@ -1,3 +1,10 @@
+# Universidad del Valle de Guatemala
+# Cifrado de informacion
+# Lab 4
+# Julio Herrera
+# Bryann Alfaro
+# Diego Arredondo
+
 from cifrados import lfsr, lgc, wichman
 import math
 import scipy.special as ss
@@ -578,7 +585,8 @@ def getHistogram(lista):
     # plt.ylabel('Probabilidad')
     # plt.xlabel('Test')
     # plt.show()
-    plt.hist(lista, density=False, bins=7)
+
+    plt.hist(lista, density=False, bins=10)
     plt.title('Probabilidades de los tests')
     plt.ylabel('Cantidad de cadenas')
     plt.xlabel('Test fallidos')
@@ -610,5 +618,5 @@ def generateLFSR(size=20000, iterations=1000):
     for _ in range(iterations):
         bits = lfsr(seed=format('110100011011011010111101'),
                     taps=[2, 5, 7, 10, 15, 11], nbits=size)
-        lista += successTable(bits)
+        lista.append(len(successTable(bits, returnFails=True)))
     getHistogram(lista)

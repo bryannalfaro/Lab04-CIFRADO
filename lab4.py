@@ -1,6 +1,6 @@
 # Universidad del Valle de Guatemala
 # Cifrado de informacion
-# Lab 3
+# Lab 4
 # Julio Herrera
 # Bryann Alfaro
 # Diego Arredondo
@@ -18,31 +18,30 @@ size = len(imgBits)
 
 examplesData = json.load(open('examplesData.json'))
 
-'''for example in examplesData['lgc']:
+#3 ejemplos buenos y malos lgc
+for example in examplesData['lgc']:
     print(example)
     resultLGC = cifrados.lgc(a=example['a'], b=example['b'], N=example['N'], seed=example['seed'], size=size)
     testsResults = testLab.successTable(resultLGC, True)
-    #testLab.getHistogram(testsResults)
 
-for example in examplesData['wichman']:
+#3 ejemplos buenos y malos wichman
+for example in examplesData['wichmaN']:
+    print(example)
     resultWichman = cifrados.wichman(example['s1'], example['s2'], example['s3'], size)
     testsResults = testLab.successTable(resultWichman)
-    #testLab.getHistogram(testsResults)
 
+#3 ejemplos buenos y malos lfsr
 for example in examplesData['lfsr']:
+    print(example)
     resultLFSR = cifrados.lfsr(seed=example['seed'], taps=example['taps'], nbits=size)
     lfsr_xor = cifrados.xor(imgBits, resultLFSR)
     testsResults = testLab.successTable(lfsr_xor, True)
-    #testLab.getHistogram(testsResults)'''
 
 
-#testLab.generateLGC(iterations=20)
+#200 iteraciones de cada generador para histograma
+testLab.generateLGC(iterations=200)
 
-testLab.generateWichman(iterations=50)
+testLab.generateWichman(iterations=200)
 
-#testLab.generateLFSR(iterations=200)
+testLab.generateLFSR(iterations=200)
 
-'''print('now LFSR')
-resultLFSR = cifrados.lfsr(seed=format('110100011011011010111101'), taps=[2,5,7,10,15,11], nbits=size)
-lfsr_xor = cifrados.xor(imgBits, resultLFSR)
-testLab.successTable(lfsr_xor, True)'''
