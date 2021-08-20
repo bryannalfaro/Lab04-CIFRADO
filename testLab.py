@@ -4,9 +4,12 @@ import scipy.special as ss
 from fractions import Fraction
 import numpy as np
 import random
+import matplotlib.pyplot as plt
 
 
 # TEST TAKE FROM : https://github.com/GINARTeam/NIST-statistical-test
+
+# 01 Monobit test
 def test1(text, th=0.01):
     n = len(text)
     ones = text.count('1')  # number of ones
@@ -16,7 +19,7 @@ def test1(text, th=0.01):
     success = (p >= th)  # success = true if p-value >= 0.01
     return [p, success]
 
-
+# 02 Frequency within block test
 def test2(text, th=0.01, M=32):
     n = len(text)
     # Compute number of blocks M = block size. N=num of blocks
@@ -49,7 +52,7 @@ def test2(text, th=0.01, M=32):
     success = (p >= th)
     return [p, success]
 
-
+# 03 Runs test
 def test3(text, th=0.01):
     n = len(text)
     ones = text.count('1')  # number of ones
@@ -71,7 +74,7 @@ def test3(text, th=0.01):
     success = (p >= th)
     return [p, success]
 
-
+# 04 Longest run ones in a block test
 def test4(text, th=0.01):
     n = len(text)
     M8 = [0.2148, 0.3672, 0.2305, 0.1875]
@@ -115,10 +118,7 @@ def test4(text, th=0.01):
     success = (p >= th)
     return [p, success]
 
-# 5 no jalo
-
-# este es el 6
-
+# 08 Overlapping template matching test
 def lgamma(x):
     return math.log(ss.gamma(x))
 
@@ -192,9 +192,7 @@ def test5(text, th=0.01):
     success = (p >= th)
     return [p, success]
 
-# este es el 7
-
-
+# 07 Non Overlapping template matching test
 def test6(text, th=0.01):
     n = len(text)
     # The templates provdided in SP800-22rev1a
@@ -306,9 +304,7 @@ def test6(text, th=0.01):
     success = (p >= th)
     return [p, success]
 
-# este es el 9
-
-
+# 09 maurers universal test
 def test7(text, th=0.01, patternlen=None, initblocks=None):
     n = len(text)
     # Step 1. Choose the block size
@@ -372,9 +368,7 @@ def test7(text, th=0.01, patternlen=None, initblocks=None):
     success = (P >= th)
     return [P, success]
 
-# este es el 12
-
-
+# 12 Approximate entropy test
 def test8(text, th=0.01):
     n = len(text)
     m = int(math.floor(math.log(n, 2)))-6
@@ -426,9 +420,7 @@ def test8(text, th=0.01):
 
     return [p, success]
 
-# test 14
-
-
+# 14 Random excursion test
 def test9(text, th=0.01):
     n = len(text)
     # Convert to +1,-1
@@ -518,9 +510,7 @@ def test9(text, th=0.01):
 
     return [p_total/8, success]
 
-# este es el 15
-
-
+# 15 Random excursion variant test
 def test10(text, th=0.01):
     n = len(text)
     x = list()             # Convert to +1,-2
@@ -567,42 +557,57 @@ def test10(text, th=0.01):
 
     return [p, success]
 
-# TODO REVISAR EN EL METODO QUE FALLA PARA VER SI DE VERDAD FALLA
+# --------------------------------------------------------------------------- #
 
-
-def successTable(bits):
+def successTable(bits, showTable=False, returnFails=False):
     lista = []
     for i in range(10):
         result = globals()['test{}'.format(i+1)](bits)
         print('Test ', (i+1), ', p = ', result[0], ', result = ', result[1])
+        if returnFails:
+            if not result[1]:
+                lista.append(result[0])
+        else:
+            lista.append(result[0])
+    return lista
 
+def getHistogram(lista):
+    # plt.bar([ f'Test {i+1}' for i in range(10) ], lista)
+    # plt.title('Probabilidades de los tests')
+    # plt.ylabel('Probabilidad')
+    # plt.xlabel('Test')
+    # plt.show()
+    plt.hist(lista, density=True, bins=[0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1])
+    plt.title('Probabilidades de los tests')
+    plt.ylabel('Cantidad de tests')
+    plt.xlabel('Probabilidad')
+    plt.show()
 
-# to generate histogram
-# TODO Revisar que cosas van random y hacer el histograma
-def generateLGC():
-    for i in range(200):
+def generateLGC(seed=30, size=20000, iterations=1000):
+    lista = []
+    for _ in range(iterations):
         a = random.randint(0, 40000)
         b = random.randint(0, 40000)
         N = random.randint(0, 40000)
-        bits = lgc(a, b, N, 35, 100)
-        successTable(bits)
+        bits = lgc(a, b, N, seed, size)
+        lista += successTable(bits, returnFails=True)
+    getHistogram(lista)
 
-        # contar cuantos test fallo cada cadena
-        # contar cuantas cadenas fallaron en total por test
-
-
-def generateWichman():
-    for i in range(200):
+def generateWichman(size=20000, iterations=1000):
+    lista = []
+    for _ in range(iterations):
         s1 = random.randint(0, 30000)
         s2 = random.randint(0, 30000)
         s3 = random.randint(0, 30000)
+        bits = wichman(s1, s2, s3, size)
+        lista += successTable(bits)
+    getHistogram(lista)
 
-        bits = wichman(s1, s2, s3, 100)
-        successTable(bits)
 
-
-def generateLFSR():
-    for i in range(200):
+def generateLFSR(size=20000, iterations=1000):
+    lista = []
+    for _ in range(iterations):
         bits = lfsr(seed=format('110100011011011010111101'),
-                    taps=[2, 5, 7, 10, 15, 11], nbits=100)
-        successTable(bits)
+                    taps=[2, 5, 7, 10, 15, 11], nbits=size)
+        lista += successTable(bits)
+    getHistogram(lista)

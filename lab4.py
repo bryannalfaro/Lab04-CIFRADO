@@ -10,55 +10,39 @@ import matplotlib.pyplot as plt
 from PIL import Image
 import random
 import testLab
-
-def show_image(I):
-    plt.figure()
-    plt.imshow(I,cmap='gray')
-    plt.show()
-
-# load image as pixel array
-'''img = Image.open('camera.png').convert('L') # L = 8-bit pixels, black and white
-#img.show()
-
-imgBits = cifrados.read_image(img)
-
-I = cifrados.write_image(imgBits, img)
-show_image(I)
-
-# algorithms
-
-resultLGC_test = cifrados.lgc(a=3, b=3, N=7, seed=5, size=16) # Prueba de LGC retornando 16 bits
-print(resultLGC_test)
-
-print('Now LGC')
-a= int(input('Ingrese a: '))
-b= int(input('Ingrese b: '))
-N= int(input('Ingrese N: '))
-resultLGC = cifrados.lgc(a=a, b=b, N=N, seed=53, size=len(imgBits))
-
-lgc_xor = cifrados.xor(imgBits, resultLGC)
-show_image(cifrados.write_image(lgc_xor, img))
-
-print('Now wichman')
-s1 = random.randint(0,30000)
-s2 = random.randint(0,30000)
-s3 = random.randint(0,30000)
-resultWichman = cifrados.wichman(s1,s2,s3,len(imgBits))
-
-wichman_xor = cifrados.xor(imgBits, resultWichman)
-show_image(cifrados.write_image(wichman_xor, img))'''
-
+import json
 
 img = Image.open('camera.png').convert('L') # L = 8-bit pixels, black and white
-#img.show()
-
 imgBits = cifrados.read_image(img)
-resultLFSR = cifrados.lfsr(seed=format('110100011011011010111101'), taps=[2,5,7,10,15,11], nbits=len(imgBits))
-lfsr_xor = cifrados.xor(imgBits, resultLFSR)
+size = len(imgBits)
+
+examplesData = json.load(open('examplesData.json'))
+'''
+for example in examplesData['lgc']:
+    print(example)
+    resultLGC = cifrados.lgc(a=example['a'], b=example['b'], N=example['N'], seed=example['seed'], size=size)
+    testsResults = testLab.successTable(resultLGC, True)
+    testLab.getHistogram(testsResults)
+
+for example in examplesData['wichman']:
+    resultWichman = cifrados.wichman(example['s1'], example['s2'], example['s3'], size)
+    testsResults = testLab.successTable(resultWichman)
+    testLab.getHistogram(testsResults)
+
+for example in examplesData['lfsr']:
+    resultLFSR = cifrados.lfsr(seed=example['seed'], taps=example['taps'], nbits=size)
+    lfsr_xor = cifrados.xor(imgBits, resultLFSR)
+    testsResults = testLab.successTable(lfsr_xor, True)
+    testLab.getHistogram(testsResults)
+'''
+
+testLab.generateLGC(iterations=200)
+
+testLab.generateWichman(iterations=200)
+
+testLab.generateLFSR(iterations=200)
+
 print('now LFSR')
-#show_image(cifrados.write_image(lfsr_xor, img))
-
-
-testLab.successTable(lfsr_xor)
-
-
+resultLFSR = cifrados.lfsr(seed=format('110100011011011010111101'), taps=[2,5,7,10,15,11], nbits=size)
+lfsr_xor = cifrados.xor(imgBits, resultLFSR)
+testLab.successTable(lfsr_xor, True)
