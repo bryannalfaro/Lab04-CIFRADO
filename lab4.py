@@ -6,9 +6,7 @@
 # Diego Arredondo
 
 import cifrados
-import matplotlib.pyplot as plt
 from PIL import Image
-import random
 import testLab
 import json
 
@@ -24,7 +22,7 @@ for example in examplesData['lgc']:
     resultLGC = cifrados.lgc(a=example['a'], b=example['b'], N=example['N'], seed=example['seed'], size=size)
     testsResults = testLab.successTable(resultLGC, True)
 
-#3 ejemplos buenos y malos wichman
+#3 ejemplos buenos
 for example in examplesData['wichmaN']:
     print(example)
     resultWichman = cifrados.wichman(example['s1'], example['s2'], example['s3'], size)
@@ -37,11 +35,9 @@ for example in examplesData['lfsr']:
     lfsr_xor = cifrados.xor(imgBits, resultLFSR)
     testsResults = testLab.successTable(lfsr_xor, True)
 
-
 #200 iteraciones de cada generador para histograma
 testLab.generateLGC(iterations=200)
 
 testLab.generateWichman(iterations=200)
 
 testLab.generateLFSR(iterations=200)
-

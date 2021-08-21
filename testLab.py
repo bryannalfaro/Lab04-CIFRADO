@@ -9,14 +9,13 @@ from cifrados import lfsr, lgc, wichman
 import math
 import scipy.special as ss
 from fractions import Fraction
-import numpy as np
 import random
 import matplotlib.pyplot as plt
-
 
 # TEST TAKE FROM : https://github.com/GINARTeam/NIST-statistical-test
 
 # 01 Monobit test
+
 def test1(text, th=0.01):
     n = len(text)
     ones = text.count('1')  # number of ones
@@ -27,6 +26,7 @@ def test1(text, th=0.01):
     return [p, success]
 
 # 02 Frequency within block test
+
 def test2(text, th=0.01, M=32):
     n = len(text)
     # Compute number of blocks M = block size. N=num of blocks
@@ -60,6 +60,7 @@ def test2(text, th=0.01, M=32):
     return [p, success]
 
 # 03 Runs test
+
 def test3(text, th=0.01):
     n = len(text)
     ones = text.count('1')  # number of ones
@@ -76,12 +77,12 @@ def test3(text, th=0.01):
             if text[i] != text[i+1]:
                 vobs += 1.0
 
-        p = math.erfc(abs(vobs - (2.0*n*prop*(1.0-prop))) /
-                      (2.0*math.sqrt(2.0*n)*prop*(1-prop)))
+        p = math.erfc(abs(vobs - (2.0*n*prop*(1.0-prop))) / (2.0*math.sqrt(2.0*n)*prop*(1-prop)))
     success = (p >= th)
     return [p, success]
 
 # 04 Longest run ones in a block test
+
 def test4(text, th=0.01):
     n = len(text)
     M8 = [0.2148, 0.3672, 0.2305, 0.1875]
@@ -126,16 +127,17 @@ def test4(text, th=0.01):
     return [p, success]
 
 # 08 Overlapping template matching test
+
 def lgamma(x):
     return math.log(ss.gamma(x))
 
 def Pr(u, eta):
-    if ( u == 0 ):
+    if (u == 0):
         p = math.exp(-eta)
     else:
         sum = 0.0
-        for l in range(1,u+1):
-            sum += math.exp(-eta-u*math.log(2)+l*math.log(eta)-lgamma(l+1)+lgamma(u)-lgamma(l)-lgamma(u-l+1))
+        for l in range(1, u+1):
+            sum += math.exp(-eta-u*math.log(2)+l*math.log(eta) - lgamma(l+1)+lgamma(u)-lgamma(l)-lgamma(u-l+1))
         p = sum
     return p
 
@@ -200,6 +202,7 @@ def test5(text, th=0.01):
     return [p, success]
 
 # 07 Non Overlapping template matching test
+
 def test6(text, th=0.01):
     n = len(text)
     # The templates provdided in SP800-22rev1a
@@ -312,6 +315,7 @@ def test6(text, th=0.01):
     return [p, success]
 
 # 09 maurers universal test
+
 def test7(text, th=0.01, patternlen=None, initblocks=None):
     n = len(text)
     # Step 1. Choose the block size
@@ -376,6 +380,7 @@ def test7(text, th=0.01, patternlen=None, initblocks=None):
     return [P, success]
 
 # 12 Approximate entropy test
+
 def test8(text, th=0.01):
     n = len(text)
     m = int(math.floor(math.log(n, 2)))-6
@@ -428,6 +433,7 @@ def test8(text, th=0.01):
     return [p, success]
 
 # 14 Random excursion test
+
 def test9(text, th=0.01):
     n = len(text)
     # Convert to +1,-1
@@ -459,7 +465,7 @@ def test9(text, th=0.01):
     J = len(cycles)
 
     vxk = [['a', 'b', 'c', 'd', 'e', 'f']
-           for y in [-4, -3, -2, -1, 1, 2, 3, 4]]
+            for y in [-4, -3, -2, -1, 1, 2, 3, 4]]
 
     # Count Occurances
     for k in range(6):
@@ -507,17 +513,16 @@ def test9(text, th=0.01):
             top = top*top
             bottom = J * pikx[abs(x)-1][k]
             chisq += top/bottom
-
         p = ss.gammaincc(5.0/2.0, chisq/2.0)
         p_total += p
         plist.append(p)
         chi_sq.append(chisq)
         if p < th:
             success = False
-
     return [p_total/8, success]
 
 # 15 Random excursion variant test
+
 def test10(text, th=0.01):
     n = len(text)
     x = list()             # Convert to +1,-2
@@ -554,19 +559,16 @@ def test10(text, th=0.01):
             top = abs(count[x]-J)
             bottom = math.sqrt(2.0 * J * ((4.0*abs(x))-2.0))
             p = ss.erfc(top/bottom)
-
             # print("p[" + str(x) +"] = " + str(p))
-
             p_average += p
             plist.append(p)
             if p < th:
                 success = False
-
     return [p, success]
 
 # --------------------------------------------------------------------------- #
 
-def successTable(bits, showTable=False, returnFails=False):
+def successTable(bits, returnFails=False):
     lista = []
     for i in range(10):
         result = globals()['test{}'.format(i+1)](bits)
@@ -580,12 +582,6 @@ def successTable(bits, showTable=False, returnFails=False):
     return lista
 
 def getHistogram(lista):
-    # plt.bar([ f'Test {i+1}' for i in range(10) ], lista)
-    # plt.title('Probabilidades de los tests')
-    # plt.ylabel('Probabilidad')
-    # plt.xlabel('Test')
-    # plt.show()
-
     plt.hist(lista, density=False, bins=10)
     plt.title('Probabilidades de los tests')
     plt.ylabel('Cantidad de cadenas')
@@ -611,7 +607,6 @@ def generateWichman(size=20000, iterations=1000):
         bits = wichman(s1, s2, s3, size)
         lista.append(len(successTable(bits, returnFails=True)))
     getHistogram(lista)
-
 
 def generateLFSR(size=20000, iterations=1000):
     lista = []
